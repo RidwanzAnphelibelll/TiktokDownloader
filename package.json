@@ -5,9 +5,10 @@
     "start": "node index.js"
   },
   "author": "RidwanzSaputra",
+  "dependencies": {
     "node-telegram-bot-api": "^0.66.0",
     "express": "^4.19.2",
-    "axios": "1.7.7",
+    "axios": "^1.7.7",
     "chalk": "^4.1.1"
   }
 }

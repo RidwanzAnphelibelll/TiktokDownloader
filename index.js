@@ -20,23 +20,29 @@ app.use(express.json());
 
 const tiktok = async (url) => {
   const host = 'https://www.tikwm.com/';
-  const res = await axios.post(host + 'api/', new URLSearchParams({
-    url: url,
-    count: 1,
-    cursor: 0,
-    web: 1,
-    hd: 1
-  }), {
-    headers: {
-      'accept': 'application/json, text/javascript, */*; q=0.01',
-      'content-type': 'application/x-www-form-urlencoded; charset=UTF-8',
-      'sec-ch-ua': '"Chromium";v="104", " Not A;Brand";v="99", "Google Chrome";v="104"',
-      'user-agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/104.0.0.0 Safari/537.36'
+  const res = await axios.post(
+    host + 'api/',
+    new URLSearchParams({
+      url: url,
+      count: 1,
+      cursor: 0,
+      web: 1,
+      hd: 1,
+    }),
+    {
+      headers: {
+        'accept': 'application/json, text/javascript, */*; q=0.01',
+        'content-type': 'application/x-www-form-urlencoded; charset=UTF-8',
+        'sec-ch-ua': '"Chromium";v="104", " Not A;Brand";v="99", "Google Chrome";v="104"',
+        'user-agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/104.0.0.0 Safari/537.36',
+      }
     }
-  });
+  );
+
   return {
-    title: res.data.data.title,
+    title_video: res.data.data.title,
     video: host + res.data.data.play,
+    title_audio: res.data.data.music_info?.title,
     audio: host + res.data.data.music
   };
 };
@@ -75,7 +81,6 @@ bot.on('message', async (msg) => {
   const urlRegex = /^https:\/\/.*tiktok\.com\/.+/;
   if (urlRegex.test(msg.text)) {
     const url = msg.text;
-
     const options = [
       {
         text: 'Video',
@@ -98,9 +103,9 @@ bot.on('message', async (msg) => {
         try {
           bot.sendChatAction(msg.chat.id, 'upload_video');
           const data = await tiktok(url);
-          await bot.sendVideo(msg.chat.id, data.video, { caption: data.title, reply_to_message_id: msg.message_id });
+          await bot.sendVideo(msg.chat.id, data.video, { caption: data.title_video, reply_to_message_id: msg.message_id });
           bot.deleteMessage(msg.chat.id, message.message_id);
-          
+
         } catch (error) { 
           bot.sendChatAction(msg.chat.id, 'typing');
           bot.sendMessage(msg.chat.id, 'Maaf, Terjadi Kesalahan Saat Mengunduh Video TikTok.', {
@@ -114,7 +119,7 @@ bot.on('message', async (msg) => {
         try {
           bot.sendChatAction(msg.chat.id, 'upload_audio');
           const data = await tiktok(url);
-          await bot.sendAudio(msg.chat.id, data.audio, { caption: data.title, reply_to_message_id: msg.message_id }); 
+          await bot.sendAudio(msg.chat.id, data.audio, { caption: data.title_audio, reply_to_message_id: msg.message_id }); 
           bot.deleteMessage(msg.chat.id, message.message_id);
           
         } catch (error) {
